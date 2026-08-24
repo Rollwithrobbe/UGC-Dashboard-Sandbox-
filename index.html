@@ -172,7 +172,9 @@
   select.status-select{
     background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:5px;
     font-size:11.5px; font-weight:600; padding:5px 8px; font-family:inherit; cursor:pointer;
+    transition:border-color 150ms ease, filter 100ms ease-out;
   }
+  select.status-select:active{ filter:brightness(0.94); } /* transform:scale on a native <select> can render oddly while its dropdown opens, so a brightness dip instead */
 
   .empty{ padding:44px 20px; text-align:center; color:var(--text-faint); font-size:13px; }
   .empty b{ display:block; color:var(--text-dim); font-size:14px; margin-bottom:4px; }
@@ -186,14 +188,16 @@
 
   .cell-input{ background:transparent; border:1px solid transparent; border-radius:5px; padding:5px 7px; color:var(--text); font-family:inherit; font-size:13px; width:100%; }
   .cell-input:hover{ border-color:var(--border-soft); }
-  .cell-input:focus{ border-color:var(--accent-dim); background:var(--bg-raised); outline:none; }
+  .cell-input:focus{ border-color:var(--accent-dim); background:var(--bg-raised); outline:none; box-shadow:0 0 0 2px var(--accent-dim); }
 
   .date-trigger{
     background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
     padding:6px 10px; font-size:12px; font-family:'IBM Plex Mono',monospace; color:var(--text); cursor:pointer;
+    transition:transform 100ms ease-out, border-color 150ms ease;
   }
   .date-trigger.empty{ color:var(--text-faint); font-family:'Inter',sans-serif; }
   .date-trigger:hover{ border-color:var(--accent-dim); }
+  .date-trigger:active{ transform:scale(0.97); }
 
   .hint{ font-size:11.5px; color:var(--text-faint); margin-top:-6px; margin-bottom:12px; line-height:1.5; }
 
@@ -205,6 +209,12 @@
     border:1px solid var(--border); border-top-color:rgba(255,255,255,0.06); border-radius:var(--radius); width:100%; max-width:560px; padding:22px; margin-bottom:5vh;
     box-shadow:0 20px 50px rgba(0,0,0,.45);
   }
+  /* materialize-in: plays once, the moment the modal/overlay node is created (openModal sets
+     MODAL_ENTER only for that one render() call — see the JS comment by its declaration) */
+  @keyframes overlayFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes modalPopIn{ from{ opacity:0; transform:scale(0.92) translateY(8px); } to{ opacity:1; transform:scale(1) translateY(0); } }
+  .overlay-enter{ animation:overlayFadeIn 180ms ease both; }
+  .modal-enter{ animation:modalPopIn 240ms cubic-bezier(0.34,1.15,0.64,1) both; transform-origin:top center; }
   .modal h3{ font-size:16px; margin-bottom:16px; }
   .field{ margin-bottom:13px; }
   .field label{ display:block; font-size:11.5px; color:var(--text-dim); margin-bottom:5px; font-weight:600; }
@@ -226,10 +236,15 @@
   .checkbox{ width:15px; height:15px; accent-color:var(--accent); }
 
   /* ---- date picker popover ---- */
-  .dp-popover{ position:fixed; z-index:200; background:var(--bg-raised); border:1px solid var(--border); border-radius:var(--radius); padding:10px; width:232px; box-shadow:0 14px 34px rgba(0,0,0,.45); }
+  .dp-popover{
+    position:fixed; z-index:200; background:rgba(28,27,35,0.88);
+    backdrop-filter:blur(16px) saturate(150%); -webkit-backdrop-filter:blur(16px) saturate(150%);
+    border:1px solid var(--border); border-radius:var(--radius); padding:10px; width:232px; box-shadow:0 14px 34px rgba(0,0,0,.45);
+  }
   .dp-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .dp-head button{ background:transparent; border:none; color:var(--text-dim); cursor:pointer; font-size:15px; padding:2px 8px; border-radius:5px; }
+  .dp-head button{ background:transparent; border:none; color:var(--text-dim); cursor:pointer; font-size:15px; padding:2px 8px; border-radius:5px; transition:transform 100ms ease-out; }
   .dp-head button:hover{ background:var(--surface); color:var(--text); }
+  .dp-head button:active{ transform:scale(0.9); }
   .dp-title{ font-size:12.5px; font-weight:700; }
   .dp-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
   .dp-dow{ font-size:9.5px; color:var(--text-faint); text-align:center; padding:2px 0; }
@@ -303,7 +318,8 @@
 
   .chart-tooltip{
     position:fixed; z-index:250; pointer-events:none; opacity:0; transition:opacity .1s ease;
-    background:var(--bg-raised); border:1px solid var(--border); border-radius:var(--radius-sm);
+    background:rgba(28,27,35,0.90); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%);
+    border:1px solid var(--border); border-radius:var(--radius-sm);
     padding:9px 12px; font-size:12px; line-height:1.6; box-shadow:0 10px 26px rgba(0,0,0,.4); max-width:230px;
   }
   .chart-tooltip.show{ opacity:1; }
@@ -343,11 +359,16 @@
     .sidebar{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
     .modal{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
     .ai-drawer{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
+    .dp-popover{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
+    .chart-tooltip{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
   }
 
   @media (prefers-reduced-motion: reduce){
     .ai-drawer{ transition:opacity 150ms ease; opacity:0; pointer-events:none; transform:translateX(0); }
     .ai-drawer.open{ opacity:1; pointer-events:auto; }
+    .overlay-enter{ animation:overlayFadeIn 120ms ease both; }
+    .modal-enter{ animation:overlayFadeIn 120ms ease both; transform:none; }
+    .timer-done-modal{ animation:none; }
   }
 </style>
 </head>
@@ -578,6 +599,7 @@ let DP = null; // { key, month: Date }
 let DASH_RANGE = 'month';
 let TASK_TIMERS = {}; // taskId -> { remaining, intervalId }
 let TIMER_DONE_POPUP = null; // { taskTitle }
+let TIMER_ENTER = false;
 
 function normalizePlatforms(existing){
   return PLATFORMS.map(p => {
@@ -1791,12 +1813,14 @@ function completeTask(taskId, viaTimer){
   saveData();
   if(viaTimer){
     TIMER_DONE_POPUP = { taskTitle: task.title };
+    TIMER_ENTER = true;
     playTimerDoneSound();
     tryBrowserNotification(task.title);
   } else {
     showToast('Marked done');
   }
   render();
+  TIMER_ENTER = false;
 }
 function toggleTaskDone(taskId){
   const task = DATA.tasks.find(x=>x.id===taskId);
@@ -2432,7 +2456,7 @@ function tryBrowserNotification(taskTitle){
 }
 function renderTimerDonePopup(){
   if(!TIMER_DONE_POPUP) return '';
-  return `<div class="overlay open" style="z-index:400;" id="timerDoneOverlay">
+  return `<div class="overlay open ${TIMER_ENTER?'overlay-enter':''}" style="z-index:400;" id="timerDoneOverlay">
     <div class="modal timer-done-modal" style="max-width:340px; margin-top:24vh; text-align:center;">
       <div class="timer-done-icon">⏰</div>
       <h3 style="margin-bottom:8px;">Timer's up!</h3>
@@ -2444,11 +2468,12 @@ function renderTimerDonePopup(){
 
 /* ---------------- confirm dialog (native confirm() is blocked in the artifact sandbox) ---------------- */
 let CONFIRM_STATE = null; // { message, onYes }
-function askConfirm(message, onYes){ CONFIRM_STATE = { message, onYes }; render(); }
+let CONFIRM_ENTER = false;
+function askConfirm(message, onYes){ CONFIRM_STATE = { message, onYes }; CONFIRM_ENTER = true; render(); CONFIRM_ENTER = false; }
 function renderConfirm(){
   if(!CONFIRM_STATE) return '';
-  return `<div class="overlay open" style="z-index:300;" id="confirmOverlay">
-    <div class="modal" style="max-width:380px; margin-top:22vh;">
+  return `<div class="overlay open ${CONFIRM_ENTER?'overlay-enter':''}" style="z-index:300;" id="confirmOverlay">
+    <div class="modal ${CONFIRM_ENTER?'modal-enter':''}" style="max-width:380px; margin-top:22vh;">
       <h3>Are you sure?</h3>
       <div style="color:var(--text-dim); font-size:13px; margin-bottom:18px; line-height:1.5;">${escapeHtml(CONFIRM_STATE.message)}</div>
       <div class="modal-actions"><div></div><div class="right">
@@ -2461,6 +2486,9 @@ function renderConfirm(){
 
 /* ---------------- modals ---------------- */
 let MODAL_STATE = { type:null, id:null, draft:null };
+let MODAL_ENTER = false; // true only for the single render() call that opens a modal — a fresh CSS
+// animation plays whenever a node is first created, and root.innerHTML is rebuilt on every render(),
+// so without this flag the modal would replay its pop-in every time e.g. the date picker opens inside it.
 
 function openModal(type, id=null){
   MODAL_STATE.type = type;
@@ -2485,7 +2513,9 @@ function openModal(type, id=null){
       completed:false, dailyDone:{}, createdAt: todayISO()
     };
   }
+  MODAL_ENTER = true;
   render();
+  MODAL_ENTER = false;
   document.getElementById('overlay').classList.add('open');
 }
 function closeModal(){
@@ -2495,7 +2525,7 @@ function closeModal(){
 }
 
 function renderModals(){
-  return `<div class="overlay ${MODAL_STATE.type?'open':''}" id="overlay">${MODAL_STATE.type ? renderModalBody() : ''}</div>`;
+  return `<div class="overlay ${MODAL_STATE.type?'open':''} ${MODAL_STATE.type && MODAL_ENTER?'overlay-enter':''}" id="overlay">${MODAL_STATE.type ? renderModalBody() : ''}</div>`;
 }
 
 function renderModalBody(){
@@ -2509,7 +2539,7 @@ function renderModalBody(){
 function renderBrandModal(){
   const d = MODAL_STATE.draft;
   const brief = d.brief;
-  return `<div class="modal" style="max-width:520px;">
+  return `<div class="modal ${MODAL_ENTER?'modal-enter':''}" style="max-width:520px;">
     <h3>${MODAL_STATE.id ? 'Edit brand' : 'Add brand'}</h3>
     <div class="field"><label>Name</label><input type="text" id="f-name" value="${escapeHtml(d.name)}" placeholder="e.g. PureFi" /></div>
     <div class="field-row">
@@ -2606,7 +2636,7 @@ function renderContentModal(){
   const d = MODAL_STATE.draft;
   const selectedBrand = brandById(d.brandId);
   const hasBrief = !MODAL_STATE.id && selectedBrand && selectedBrand.brief;
-  return `<div class="modal" style="max-width:640px;">
+  return `<div class="modal ${MODAL_ENTER?'modal-enter':''}" style="max-width:640px;">
     <h3>${MODAL_STATE.id ? 'Edit content' : 'Add content'}</h3>
     <div class="field-row">
       <div class="field"><label>Title</label><input type="text" id="f-title" value="${escapeHtml(d.title)}" placeholder="e.g. PureFi — Send Money Hook v2" /></div>
@@ -2666,7 +2696,7 @@ function renderContentModal(){
 
 function renderPaymentModal(){
   const d = MODAL_STATE.draft;
-  return `<div class="modal">
+  return `<div class="modal ${MODAL_ENTER?'modal-enter':''}">
     <h3>Log payment</h3>
     <div class="field"><label>Brand</label>
       <select id="f-pbrand">${DATA.brands.length ? DATA.brands.map(b=>`<option value="${b.id}" ${d.brandId===b.id?'selected':''}>${escapeHtml(b.name)}</option>`).join('') : '<option value="">Add a brand first</option>'}</select>
@@ -2686,7 +2716,7 @@ function renderPaymentModal(){
 
 function renderTaskModal(){
   const d = MODAL_STATE.draft;
-  return `<div class="modal">
+  return `<div class="modal ${MODAL_ENTER?'modal-enter':''}">
     <h3>${MODAL_STATE.id ? 'Edit task' : 'Add task'}</h3>
     <div class="field"><label>Title</label><input type="text" id="f-ttitle" value="${escapeHtml(d.title)}" placeholder="e.g. Scroll TikTok — warm up" /></div>
     <div class="field-row">
@@ -3060,6 +3090,16 @@ function bindGlobalHandlers(){
 
   scrollAiLog();
 }
+
+/* ---------------- Escape closes whatever's on top ---------------- */
+document.addEventListener('keydown', (e) => {
+  if(e.key !== 'Escape') return;
+  if(DP){ DP = null; render(); return; }
+  if(TIMER_DONE_POPUP){ TIMER_DONE_POPUP = null; render(); return; }
+  if(CONFIRM_STATE){ CONFIRM_STATE = null; render(); return; }
+  if(MODAL_STATE.type){ closeModal(); return; }
+  if(AI_OPEN){ setAIOpen(false); return; }
+});
 
 loadData();
 </script>
