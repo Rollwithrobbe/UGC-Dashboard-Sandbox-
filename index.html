@@ -237,12 +237,12 @@
 
   /* ---- AI drawer ---- */
   .ai-drawer{
-    position:fixed; top:0; right:-420px; width:400px; max-width:92vw; height:100vh;
+    position:fixed; top:0; right:0; width:400px; max-width:92vw; height:100vh;
     background:rgba(28,27,35,0.80); backdrop-filter:blur(22px) saturate(150%); -webkit-backdrop-filter:blur(22px) saturate(150%);
     border-left:1px solid var(--border); z-index:80;
-    display:flex; flex-direction:column; transition:right .22s ease; box-shadow:-10px 0 34px rgba(0,0,0,.4);
+    display:flex; flex-direction:column; box-shadow:-10px 0 34px rgba(0,0,0,.4);
+    transform:translateX(100%); will-change:transform;
   }
-  .ai-drawer.open{ right:0; }
   .ai-drawer-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--border-soft); flex-shrink:0; }
   .ai-drawer-head h3{ font-size:15px; }
   .ai-log{ flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
@@ -328,6 +328,11 @@
     .sidebar{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
     .modal{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
     .ai-drawer{ background:var(--bg-raised); backdrop-filter:none; -webkit-backdrop-filter:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ai-drawer{ transition:opacity 150ms ease; opacity:0; pointer-events:none; transform:translateX(0); }
+    .ai-drawer.open{ opacity:1; pointer-events:auto; }
   }
 </style>
 </head>
@@ -1893,7 +1898,7 @@ function renderAIDrawer(){
   }
   const suggestions = ["Outstanding balance per brand?", "What still needs posting?", "Summarize this month"];
   return `
-    <div class="ai-drawer ${AI_OPEN?'open':''}">
+    <div class="ai-drawer ${AI_OPEN?'open':''}" style="transform:translateX(${(AI_DRAWER_X*100).toFixed(3)}%);">
       <div class="ai-drawer-head">
         <h3>AI Assistant</h3>
         <div style="display:flex; gap:6px;">
@@ -1917,7 +1922,57 @@ function renderAIDrawer(){
   `;
 }
 
-function toggleAI(){ AI_OPEN = !AI_OPEN; render(); scrollAiLog(); }
+/* ---------------- AI drawer spring ----------------
+   Critically-damped-ish spring (slight bounce, per the Apple Design skill's
+   "drawer/sheet" preset) driving a compositor-friendly transform instead of
+   a CSS transition. Position/velocity persist across renders (the drawer's
+   DOM node gets recreated by every render() call, so we re-acquire it each
+   frame rather than caching it) so re-opening/closing mid-flight re-targets
+   from the live position and velocity instead of snapping — the core
+   interruptibility principle: never animate from the target, only from
+   whatever's actually on screen right now.
+   AI_DRAWER_X: 0 = fully open, 1 = fully closed (off-screen).
+------------------------------------------------------------------ */
+let AI_DRAWER_X = 1;
+let AI_DRAWER_V = 0;
+let AI_DRAWER_RAF = null;
+function applyDrawerTransform(x){
+  const el = document.querySelector('.ai-drawer');
+  if(el) el.style.transform = `translateX(${(x*100).toFixed(3)}%)`;
+}
+function animateDrawerTo(target){
+  cancelAnimationFrame(AI_DRAWER_RAF);
+  const reduced = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced){
+    AI_DRAWER_X = target; AI_DRAWER_V = 0;
+    applyDrawerTransform(target);
+    return;
+  }
+  const stiffness = 170, damping = 20.8; // damping ratio ~0.8 — a little bounce, since this is a drawer/sheet
+  let last = performance.now();
+  function frame(now){
+    const dt = Math.min((now - last) / 1000, 0.032); // clamp so a dropped/backgrounded frame can't fling it
+    last = now;
+    const force = -stiffness * (AI_DRAWER_X - target) - damping * AI_DRAWER_V;
+    AI_DRAWER_V += force * dt;
+    AI_DRAWER_X += AI_DRAWER_V * dt;
+    applyDrawerTransform(AI_DRAWER_X);
+    if(Math.abs(AI_DRAWER_X - target) > 0.001 || Math.abs(AI_DRAWER_V) > 0.001){
+      AI_DRAWER_RAF = requestAnimationFrame(frame);
+    } else {
+      AI_DRAWER_X = target; AI_DRAWER_V = 0;
+      applyDrawerTransform(target);
+    }
+  }
+  AI_DRAWER_RAF = requestAnimationFrame(frame);
+}
+function setAIOpen(open){
+  AI_OPEN = open;
+  render();
+  if(open) scrollAiLog();
+  animateDrawerTo(open ? 0 : 1);
+}
+function toggleAI(){ setAIOpen(!AI_OPEN); }
 
 async function sendAI(question){
   if(!question || AI_BUSY) return;
@@ -2964,7 +3019,7 @@ function bindGlobalHandlers(){
   const aiToggleBtn = document.getElementById('aiToggleBtn');
   if(aiToggleBtn) aiToggleBtn.addEventListener('click', toggleAI);
   const aiClose = document.getElementById('aiClose');
-  if(aiClose) aiClose.addEventListener('click', () => { AI_OPEN=false; render(); });
+  if(aiClose) aiClose.addEventListener('click', () => { setAIOpen(false); });
   const aiSettingsToggle = document.getElementById('aiSettingsToggle');
   if(aiSettingsToggle) aiSettingsToggle.addEventListener('click', () => { AI_SETTINGS_OPEN = !AI_SETTINGS_OPEN; render(); });
   const aiSettingsSave = document.getElementById('aiSettingsSave');
