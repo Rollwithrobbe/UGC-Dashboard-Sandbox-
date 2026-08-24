@@ -62,7 +62,12 @@
   #root{ display:flex; min-height:100vh; }
   ::selection{ background:var(--accent); color:var(--accent-text); }
 
-  h1,h2,h3,h4{ font-family:'Archivo Expanded',sans-serif; margin:0; letter-spacing:-0.01em; }
+  h1,h2,h3,h4{ font-family:'Archivo Expanded',sans-serif; margin:0; }
+  /* tracking is size-specific, not tag-specific — h2 (22px page titles) is the largest
+     text on screen here despite the tag name, so it gets the tightest tracking */
+  h2{ letter-spacing:-0.015em; }
+  h1{ letter-spacing:-0.01em; } /* 17px sidebar wordmark */
+  h3,h4{ letter-spacing:0; } /* 15-16px modal/drawer headers — small enough that negative tracking just looks cramped */
   .mono{ font-family:'IBM Plex Mono',monospace; font-variant-numeric: tabular-nums; }
   a{ color:var(--accent); }
 
