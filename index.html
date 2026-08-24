@@ -81,9 +81,10 @@
   .nav-btn{
     display:flex; align-items:center; gap:9px; padding:9px 10px; border-radius:var(--radius-sm);
     color:var(--text-dim); font-size:13.5px; font-weight:500; cursor:pointer; border:1px solid transparent;
-    background:transparent; text-align:left; width:100%;
+    background:transparent; text-align:left; width:100%; transition:transform 100ms ease-out, background 100ms ease-out;
   }
   .nav-btn:hover{ background:var(--surface); color:var(--text); }
+  .nav-btn:active{ transform:scale(0.97); }
   .nav-btn.active{ background:var(--surface-2); color:var(--text); border-color:var(--border); }
   .nav-btn .dot{ width:6px; height:6px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
   .nav-btn.active .dot{ background:var(--accent); }
@@ -110,8 +111,10 @@
   .btn{
     font-family:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:var(--radius-sm);
     border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer;
+    transition:transform 100ms ease-out, border-color 150ms ease, background 150ms ease, filter 150ms ease;
   }
   .btn:hover{ border-color:var(--accent-dim); }
+  .btn:active:not(:disabled){ transform:scale(0.97); }
   .btn-primary{ background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
   .btn-primary:hover{ filter:brightness(1.08); }
   .btn-ghost{ background:transparent; border-color:transparent; color:var(--text-dim); }
@@ -131,8 +134,9 @@
   .card .big{ font-size:24px; font-weight:700; font-family:'IBM Plex Mono',monospace; }
   .card .foot{ font-size:12px; color:var(--text-dim); margin-top:6px; }
 
-  .brand-card{ cursor:pointer; }
+  .brand-card{ cursor:pointer; transition:transform 100ms ease-out, border-color 150ms ease; }
   .brand-card:hover{ border-color:var(--accent-dim); }
+  .brand-card:active{ transform:scale(0.98); }
   .brand-card .row{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:12.5px; color:var(--text-dim); }
   .swatch{ width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:7px; }
 
@@ -143,7 +147,9 @@
   td{ padding:9px 14px; border-bottom:1px solid var(--border-soft); font-size:13px; vertical-align:middle; }
   tr:last-child td{ border-bottom:none; }
   tr.row-click{ cursor:pointer; }
+  tr.row-click td{ transition:background 100ms ease-out; }
   tr.row-click:hover td{ background:var(--surface-2); }
+  tr.row-click:active td{ background:var(--border-soft); }
 
   .tag{ display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:5px; font-size:11px; font-weight:600; white-space:nowrap; }
   .tag-tiktok{ background:var(--tiktok-bg); color:var(--tiktok); }
@@ -216,8 +222,9 @@
   .dp-title{ font-size:12.5px; font-weight:700; }
   .dp-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
   .dp-dow{ font-size:9.5px; color:var(--text-faint); text-align:center; padding:2px 0; }
-  .dp-day{ font-size:12px; text-align:center; padding:6px 0; border-radius:5px; cursor:pointer; color:var(--text); background:transparent; border:none; font-family:inherit; }
+  .dp-day{ font-size:12px; text-align:center; padding:6px 0; border-radius:5px; cursor:pointer; color:var(--text); background:transparent; border:none; font-family:inherit; transition:transform 100ms ease-out; }
   .dp-day:hover{ background:var(--surface-2); }
+  .dp-day:active{ transform:scale(0.9); }
   .dp-day.selected{ background:var(--accent); color:var(--accent-text); font-weight:700; }
   .dp-day.today:not(.selected){ box-shadow:inset 0 0 0 1px var(--accent-dim); }
   .dp-foot{ display:flex; justify-content:space-between; margin-top:8px; border-top:1px solid var(--border-soft); padding-top:8px; }
@@ -249,8 +256,9 @@
   .delta{ font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:3px; }
 
   .range-pills{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
-  .range-pill{ font-size:12px; font-weight:600; padding:6px 13px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); cursor:pointer; font-family:inherit; }
+  .range-pill{ font-size:12px; font-weight:600; padding:6px 13px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); cursor:pointer; font-family:inherit; transition:transform 100ms ease-out, border-color 150ms ease; }
   .range-pill:hover{ border-color:var(--accent-dim); }
+  .range-pill:active{ transform:scale(0.95); }
   .range-pill.active{ background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
 
   .chart-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:18px 20px; margin-bottom:22px; }
@@ -272,7 +280,8 @@
   .timer-display{ font-size:13px; font-weight:600; }
 
   .platform-badges{ display:flex; flex-wrap:wrap; gap:4px; }
-  .pf-badge{ font-size:10.5px; font-weight:700; padding:3px 7px; border-radius:5px; border:1px solid transparent; cursor:pointer; font-family:inherit; }
+  .pf-badge{ font-size:10.5px; font-weight:700; padding:3px 7px; border-radius:5px; border:1px solid transparent; cursor:pointer; font-family:inherit; transition:transform 100ms ease-out; }
+  .pf-badge:active{ transform:scale(0.92); }
   .pf-badge-off{ background:transparent; border:1px dashed var(--border); color:var(--text-faint); }
   .pf-badge-off:hover{ border-color:var(--accent-dim); color:var(--text-dim); }
 
